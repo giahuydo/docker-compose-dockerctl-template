@@ -1,18 +1,16 @@
 version: '2'
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "${DOCKER_APP_PORT}:80"
-      - "${DOCKER_APP_PORT_SSL}:443"
     environment:
       WWWUSER: "${WWWUSER}"
+      CRONTAB: "on"
     volumes:
       - .:/var/www/html
     networks:
-      - distribution_api
+      - bridge
   mysql:
     image: mysql:5.7
     ports:
@@ -23,40 +21,40 @@ services:
       MYSQL_USER: "${DB_USERNAME}"
       MYSQL_PASSWORD: "${DB_PASSWORD}"
     volumes:
-      - distributionapimysql:/var/lib/mysql
+      - mysql:/var/lib/mysql
       - ./docker/mysql/conf.d:/etc/mysql/conf.d
       - ./docker/mysql/logs:/var/log/mysql
       - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     networks:
-      - distribution_api
+      - bridge
   redis:
     image: redis:alpine
     ports:
       - "${DOCKER_REDIS_PORT}:6379"
     volumes:
-      - distributionapiredis:/data
+      - redis:/data
     networks:
-      - distribution_api
+      - bridge
   mongodb:
-    image: mongo
-    restart: always
-    ports:
-      - "${DOCKER_MONGODB_PORT}:27017"
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_SEARCH_DB_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_SEARCH_DB_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_SEARCH_DB_PASSWORD}"
-    volumes:
-      - distributionmongodb:/data/db
-    networks:
-      - distribution_api
+      image: mongo
+      restart: always
+      ports:
+        - "${DOCKER_MONGODB_PORT}:27017"
+      environment:
+        MONGO_INITDB_DATABASE: "${MONGO_SEARCH_DB_DATABASE}"
+        MONGO_INITDB_ROOT_USERNAME: "${MONGO_SEARCH_DB_USERNAME}"
+        MONGO_INITDB_ROOT_PASSWORD: "${MONGO_SEARCH_DB_PASSWORD}"
+      volumes:
+        - mongo:/data/db
+      networks:
+        - bridge
 networks:
   distribution_api:
     driver: "bridge"
 volumes:
-  distributionapimysql:
+  mysql:
     driver: "local"
-  distributionapiredis:
+  redis:
     driver: "local"
-  distributionmongodb:
+  mongo:
     driver: "local"
