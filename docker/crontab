@@ -1,0 +1,1 @@
+* * * * * root cd /var/www/html && bash crontab.sh >> /dev/null 2>&1

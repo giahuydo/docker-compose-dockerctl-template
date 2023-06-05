@@ -1,0 +1,60 @@
+version: '2'
+services:
+  app:
+    build: .
+    ports:
+      - "${DOCKER_APP_PORT}:80"
+    environment:
+      WWWUSER: "${WWWUSER}"
+      CRONTAB: "on"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - bridge
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "${DOCKER_MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
+      - ./docker/mysql/logs:/var/log/mysql
+      - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - bridge
+  redis:
+    image: redis:alpine
+    ports:
+      - "${DOCKER_REDIS_PORT}:6379"
+    volumes:
+      - redis:/data
+    networks:
+      - bridge
+  mongodb:
+      image: mongo
+      restart: always
+      ports:
+        - "${DOCKER_MONGODB_PORT}:27017"
+      environment:
+        MONGO_INITDB_DATABASE: "${MONGO_SEARCH_DB_DATABASE}"
+        MONGO_INITDB_ROOT_USERNAME: "${MONGO_SEARCH_DB_USERNAME}"
+        MONGO_INITDB_ROOT_PASSWORD: "${MONGO_SEARCH_DB_PASSWORD}"
+      volumes:
+        - mongo:/data/db
+      networks:
+        - bridge
+networks:
+  distribution_api:
+    driver: "bridge"
+volumes:
+  mysql:
+    driver: "local"
+  redis:
+    driver: "local"
+  mongo:
+    driver: "local"

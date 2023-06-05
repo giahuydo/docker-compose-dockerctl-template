@@ -1,0 +1,62 @@
+version: '2'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${DOCKER_APP_PORT}:80"
+      - "${DOCKER_APP_PORT_SSL}:443"
+    environment:
+      WWWUSER: "${WWWUSER}"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - distribution_api
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "${DOCKER_MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - distributionapimysql:/var/lib/mysql
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
+      - ./docker/mysql/logs:/var/log/mysql
+      - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - distribution_api
+  redis:
+    image: redis:alpine
+    ports:
+      - "${DOCKER_REDIS_PORT}:6379"
+    volumes:
+      - distributionapiredis:/data
+    networks:
+      - distribution_api
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - "${DOCKER_MONGODB_PORT}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: "${MONGO_SEARCH_DB_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_SEARCH_DB_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_SEARCH_DB_PASSWORD}"
+    volumes:
+      - distributionmongodb:/data/db
+    networks:
+      - distribution_api
+networks:
+  distribution_api:
+    driver: "bridge"
+volumes:
+  distributionapimysql:
+    driver: "local"
+  distributionapiredis:
+    driver: "local"
+  distributionmongodb:
+    driver: "local"

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# default variables
+export DOCKER_APP_PORT=${DOCKER_APP_PORT:-8000}
+export DOCKER_MYSQL_PORT=${DOCKER_MYSQL_PORT:-4306}
+export DOCKER_REDIS_PORT=${DOCKER_REDIS_PORT:-7379}
+export DOCKER_MONGODB_PORT=${DOCKER_MONGODB_PORT:-37017}
+export WWWUSER=${WWWUSER:-$UID}
+
+if [ -f .env ]; then
+    source .env
+fi
+
+# Is the environment running
+PSRESULT="$(docker-compose ps -q)"
+if [ ! -z "$PSRESULT" ]; then
+    EXEC="yes"
+else
+    EXEC="no"
+fi
+
+COMPOSE="docker-compose -f docker-compose.yml"
+
+# If we pass any arguments...
+if [ $# -gt 0 ]; then
+    if [ "$1" == "start" ]; then
+        ${COMPOSE} up -d
+    elif [ "$1" == "stop" ]; then
+        ${COMPOSE} down
+    elif [ "$1" == "status" ]; then
+        ${COMPOSE} ps
+    elif [ "$1" == "restart" ]; then
+        ${COMPOSE} down && ${COMPOSE} up -d
+    elif [ "$1" == "destroy" ]; then
+        ${COMPOSE} down --volumes --remove-orphans --rmi local
+    elif [ "$1" == "exec" ]; then
+        shift 1
+        ${COMPOSE} exec "$@"
+    elif [ "$1" == "php" ]; then
+        shift 1
+        ${COMPOSE} exec -T app php "$@"
+    elif [ "$1" == "composer" ]; then
+        shift 1
+        if [ "$EXEC" == "yes" ]; then
+            ${COMPOSE} exec -T app composer "$@"
+        else
+            ${COMPOSE} run --rm app composer "$@"
+        fi
+    elif [ "$1" == "test" ]; then
+        shift 1
+        if [ "$EXEC" == "yes" ]; then
+            ${COMPOSE} exec -T app ./vendor/bin/phpunit "$@"
+        else
+            ${COMPOSE} run --rm app ./vendor/bin/phpunit "$@"
+        fi
+    else
+        ${COMPOSE} "$@"
+    fi
+else
+    ${COMPOSE}
+fi

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+role=${CONTAINER_ROLE:-app}
+
+# Run PHP-FPM as current user
+if [ ! -z "$WWWUSER" ]; then
+    sed -i "s/user\ \=.*/user\ \= $WWWUSER/g" /etc/php/7.2/fpm/pool.d/www.conf
+fi
+
+if [ "$role" = "scheduler" ]; then
+    while [ true ]
+    do
+        php /var/www/html/artisan schedule:run --verbose --no-interaction &
+        sleep 60
+    done
+else
+    /usr/bin/supervisord
+fi
