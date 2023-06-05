@@ -1,9 +1,3 @@
-<p align="center"><img width="120" heigh="120" src="https://avatars1.githubusercontent.com/u/29907564"></p>
-<h1 align="center">DISTRIBUTION API</h1>
-<p align="center">Central API - Influencer Marketing Platform</p>  
-<p align="center"><a href="http://teamcity.production.com.vn/viewType.html?buildTypeId=kol_api_development_build" target="_blank" title="TeamCity Build Status - Development Build"><img src="http://teamcity.production.com.vn/app/rest/builds/aggregated/strob:(branch:(buildType:(id:kol_api_development_build),policy:active_history_and_active_vcs_branches),locator:(buildType:(id:kol_api_development_build)))/statusIcon.svg"></a></p>  
-  
-  
 ## Requirement
 1. PHP >= 7.2 with native redis extension installed.
 2. Redis
@@ -74,10 +68,5 @@
   - MacOS: https://laravel.com/docs/5.6/valet
   - Linux: https://cpriego.github.io/valet-linux
   - Windows (not recommended): https://github.com/cretueusebiu/valet-windows
-
-#### Default login information:
-Email: `admin@primesocial.asia`  
-Password: `password`  
-  
   
 _Enjoy!_
